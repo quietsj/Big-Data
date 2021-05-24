@@ -1,9 +1,9 @@
-<div align="center"> <font size="6"> <b> Impala知识点总结 </b> </font></div>
+<div align="center"> <font size="12"> <b> Impala知识点总结 </b> </font></div>
 
 ---
 
 ## 目录
-1. [为什么选择Impala](#第一章、为什么选择impala)
+1. [为什么选择Impala](#第一章为什么选择impala)
     + Impala在大数据生态系统中的地位
     + 大数据工作流程的灵活性
     + 高性能的分析
@@ -20,7 +20,7 @@
 
 
 
-### 第一章、为什么选择Impala
+### 第一章为什么选择Impala
 
 >   Impala使Hadoop的数据处理工作变得更快速简便，这些工作包括复制、转换或重组和分析数据文件，
 >   并且可以可靠地、大规模地、跨网络机器并行处理这些事情。
@@ -70,6 +70,7 @@
     + Impala查询引擎是完全分散的，可以连接到任何DataNode，发出查询，并且工作自动分布到整个集群。
     + 连接：impala-shell -i host:port
     
+
     
 ### 第三章、数据库开发人员的Impala
 
