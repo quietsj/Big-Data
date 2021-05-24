@@ -1,4 +1,4 @@
-<div align="center"> <font size="6"> <b> Impala知识点总结 </b> </font></div>
+<div align="center"> <font size="12"> <b> Impala知识点总结 </b> </font></div>
 
 ---
 
@@ -15,7 +15,7 @@
 
 
 
-### 第一章为什么选择impala
+### 第一章为什么选择Impala
 
 >   Impala使Hadoop的数据处理工作变得更快速简便，这些工作包括复制、转换或重组和分析数据文件，
 >   并且可以可靠地、大规模地、跨网络机器并行处理这些事情。
