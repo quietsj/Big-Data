@@ -1,17 +1,17 @@
-<div align="center"> <font size="12"> <b> Impala知识点总结 </b> </font></div>
+<div align="center"> <font size="6"> <b> Impala知识点总结 </b> </font></div>
 
 ---
 
 ## 目录
-1. [为什么选择Impala](#第一章为什么选择impala)
+1. [为什么选择Impala](#为什么选择impala)
     + Impala在大数据生态系统中的地位
     + 大数据工作流程的灵活性
     + 高性能的分析
     + 探索商业智能
-2. [启动和运行Impala](#第二章、启动和运行impala)
+2. [启动和运行Impala](#启动和运行impala)
     + 安装
     + 连接到Impala
-3. [数据库开发人员的Impala](#第三章、数据库开发人员的impala)
+3. [数据库开发人员的Impala](#数据库开发人员的impala)
 
 
 [//]: 分页
@@ -20,7 +20,7 @@
 
 
 
-### 第一章为什么选择Impala
+### 为什么选择Impala
 
 >   Impala使Hadoop的数据处理工作变得更快速简便，这些工作包括复制、转换或重组和分析数据文件，
 >   并且可以可靠地、大规模地、跨网络机器并行处理这些事情。
@@ -50,7 +50,7 @@
 
 
 
-### 第二章、启动和运行Impala
+### 启动和运行Impala
 
 >   根据使用的Apache Hadoop的专业水平，以及拥有多少Hadoop基础设施，可以遵循不同的路径来尝试
 >   Impala。
@@ -72,7 +72,7 @@
     
 
     
-### 第三章、数据库开发人员的Impala
+### 数据库开发人员的Impala
 
 >   作为一个了解SQL的数据库开发人员，可以立即开始使用Impala。数据仓库专家应该已经熟悉分区的概念，
     如果之前处理过较小的OLTP分格数据库，那么强调大数据量将扩张视野。
