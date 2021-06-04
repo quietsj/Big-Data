@@ -12,8 +12,18 @@
     + 安装
     + 连接到Impala
 3. [数据库开发人员的Impala](#数据库开发人员的impala)
-
-
+    + SQL语言
+    + 有限的DML
+    + 没有事务
+    + 最近添加的
+    + HDFS块大小
+    + Parquet文件格式
+4. [Impala教程](#impala教程)
+    + 将文件复制到HDFS文件系统中，并加载到Impala表
+    + 十亿行之旅
+    + 复合数据类型
+    
+    
 [//]: 分页
 
 <div style="page-break-after: always;"></div>
@@ -106,3 +116,179 @@
     + 默认块大小为256MB
     + 每个查询只读取查询中引用的列
     
+
+### Impala的常见开发人员任务
+
++ 将数据放入Impala表中
+    + 外部表
+        + create external table语句相当于一个符合链接，将Impala指向一个满是HDFS文件的目录，数据文件
+            不会被移动或者更改。如果删除该表，文件将保持不变
+            
+    + Hive
+        + impala-shell 中执行invalidate metadata table_name语句，使用Impala意识到Hive创建的表
+        + impala-shell执行refresh table_name, 刷新数据
+    
+    + 使用sqoop或者kite引入数据
+    
++ Impala性能优化
+    + 优化查询性能，在将原始数据加载在表中或者数据量变更30%以上的时候，执行compute stats语句。
+        ，分区表执行compute incremental stats语句
+    
+    +使用分区表，数据使用一列或者一组列中不同值进行物理区分，这些被称为分区键列。分区键列会消失，变成
+        一个目录。
+        
+### Impala教程
+
++ 将文件复制到HDFS文件系统中，并加载到Impala表
+    ```
+    --加载数据
+    hadoop fs -mkdir /user/hive/staging
+    hadoop fs -put csv.txt /user/hive/staging
+    impala-shell
+    create database food_colors;
+    use food_colors;
+    create table food_data
+    (id int, color string, food string, weight float)
+    row format delimited fields terminated by ',';
+    load data inpath '/user/hive/staging' into table food_data;
+    --查看表所在目录
+    hadoop fs -ls -R /user/hing/warehouse/food_colors.db
+    ```
+    + 通过将数据放入HDFS目录，数据可以自动复制并分布到联网的集群中。
+    
++ 十亿行之旅
+    + 编码列
+    + 建立维度表
+    + 使用parquet模式
+    + 使用分区
+    
++ 复合数据类型
+    ```sql
+    --创建数组
+    CREATE TABLE contacts
+    (
+        name STRING
+        , address STRING
+        , phone ARRAY <STRING>
+    )
+    STORED AS PARQUET;
+    DESCRIBE contacts;
+    +---------+---------------+---------+
+    | name    | type          | comment |
+    +---------+---------------+---------+
+    | name    | string        |         |
+    | address | string        |         |
+    | phone   | array<string> |         |
+    +---------+---------------+---------+
+    DESCRIBE contacts.phone;
+    +------+--------+---------+
+    | name | type   | comment |
+    +------+--------+---------+
+    | item | string |         |
+    | pos  | bigint |         |
+    +------+--------+---------+
+    --数组类型特殊的两列，列名称固定
+    --查询数组中数据，使用join
+    SELECT name, address, a.item, a.pos
+    FROM contacts c, c.phone a
+    WHERE
+        name LIKE 'John %'
+        AND a.item LIKE '416-%'
+        AND a.pos BETWEEN 0 AND 5
+    ORDER BY a.pos;
+    
+    --创建字典
+    CREATE TABLE animals
+    (
+        name STRING
+        , aspect MAP<STRING, STRING>
+    )
+    STORED AS PARQUET;
+  
+    DESCRIBE animals;
+    +--------+--------------------+---------+
+    | name   | type               | comment |
+    +--------+--------------------+---------+
+    | name   | string             |         |
+    | aspect | map<string,string> |         |
+    +--------+--------------------+---------+
+  
+    DESCRIBE animals.aspect;
+    +-------+--------+---------+
+    | name  | type   | comment |
+    +-------+--------+---------+
+    | key   | string |         |
+    | value | string |         |
+    +-------+--------+---------+
+    --字典特殊的两列，名称固定
+    SELECT name, m.key, m.value
+        FROM animals a, a.aspect m
+        WHERE key IN ('Phylum', 'Class', 'Color', 'Legs', 'Hairless')
+    ORDER BY name, m.key;
+    
+    --创建结构体
+    CREATE TABLE RELATIONSHIPS
+    (
+        id BIGINT
+        , person STRUCT <name: STRING, address: STRING>
+        , spouse STRUCT <name: STRING, years_married: INT>
+        , pet STRUCT <name: STRING, species: STRING, friendly: BOOLEAN>
+    )
+    STORED AS PARQUET;
+    
+    DESCRIBE relationships;
+    +--------+---------------------+---------+
+    | name   | type                | comment |
+    +--------+---------------------+---------+
+    | id     | bigint              |         |
+    | person | struct<             |         |
+    |        | name:string,        |         |
+    |        | address:string      |         |
+    |        | >                   |         |
+    | spouse | struct<             |         |
+    |        | name:string,        |         |
+    |        | years_married:int   |         |
+    |        | >                   |         |
+    | pet    | struct<             |         |
+    |        | name:string,        |         |
+    |        | species:string,     |         |
+    |        | friendly:boolean    |         |
+    |        | >                   |         |
+    +--------+---------------------+---------+
+  
+    DESCRIBE relationships.pet;
+    +----------+---------+---------+
+    | name     | type    | comment |
+    +----------+---------+---------+
+    | name     | string  |         |
+    | species  | string  |         |
+    | friendly | boolean |         |
+    +----------+---------+---------+     
+    --每个结构体不同的列名称
+    
+    --查询结构体列直接使用结构体名称
+    SELECT id, person.name, pet.name, pet.species
+        FROM relationships
+    WHERE
+         pet.species IN ('Dog','Cat')
+         AND pet.friendly = true
+         AND spouse.years_married < 5;    
+  
+    --组合数据类型
+    CREATE TABLE array_of_structs
+    (
+        family_id INT
+        , person ARRAY <STRUCT <name: STRING
+                                ,height: INT
+                                ,weight: INT
+                                ,eye_color: STRING
+                               >
+                        >
+    )
+    STORED AS PARQUET;
+    --item列可以省略
+    SELECT a.family_id, p.name, p.height, p.weight, p.item.eye_color
+        FROM array_of_structs a, a.person p
+    
+    --使用Hive的collect_list()和named_struct()函数分别构造数组和结构体对象，然后插入数据
+    ```
